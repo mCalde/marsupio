@@ -1,0 +1,159 @@
+from os.path import isfile, join
+import string
+import sys
+import os
+import getopt
+import random
+
+import matplotlib.pyplot as plt
+import matplotlib.cm as cm
+
+from sklearn.decomposition import PCA
+from sklearn import preprocessing
+from sklearn.pipeline import Pipeline
+from sklearn import metrics
+from sklearn.cluster import KMeans
+#from sklearn.preprocessing import MinMaxScaler
+import numpy as np
+from sklearn import svm
+
+def scale(dataset):
+	min_max_scaler = preprocessing.Normalizer()
+	X_scaled =  min_max_scaler.fit_transform(dataset)
+	return X_scaled
+def randomtargets(dataset):
+	targets= []
+	for item in dataset:
+		t = 0
+		if item[1]>1.7:
+			t = 0
+		elif item[1]>1.5:
+			t = 1
+		elif item[1]>1.4:
+			t = 2
+		else:
+			t = 3
+		targets.append(t)
+	return targets
+def read_interval_file(f):	
+	intfile = open(f,'r')
+	lines = [ l.rstrip() for l in intfile.readlines()]
+	#header =[l.replace('"','') for l in lines[0].split(',')]
+	lines = lines[1:]
+	#intervalsdict = []
+	intervalslist = []
+	# carica in intervals tutti gli intervalli creati
+	# in ordine di indice (ie temporale)
+
+	for l in lines:
+		llist = [float(ll.replace("'",'')) for ll in l.split(',')]
+	#	tmpdict = {}
+		i = 0
+		intervalslist.append([f for f in llist[1:]])
+	#	for h in header:
+
+	#		tmpdict[h] = llist[i]
+	#		i+=1
+	#		intervalsdict.append(tmpdict)	
+	return intervalslist
+# MAIN
+def main(argv):
+	# defaults
+	directory =""
+	perc = 0.9
+	output = ""
+	sint = read_interval_file('../script/stepstats.csv')
+	
+	cint = read_interval_file('../script/contstats.csv')
+	
+	colors = np.array([x for x in 'bgrcmykbgrcmykbgrcmykbgrcmyk'])
+	colors = np.hstack([colors] * 20)
+	
+	featdim = 10
+	
+	Y= randomtargets(sint)
+	clf = svm.SVC(kernel='rbf', gamma=0.7)
+	pca = PCA(n_components=featdim)
+	pca_svm = Pipeline([('pca', pca), ('svm',clf),])
+	
+	print pca_svm.fit(sint, Y) 
+	X_r = pca.fit(sint).transform(sint)
+	cX_r = pca.fit(sint).transform(cint)
+	features = []
+	for i in range(0,featdim):
+		features.append([l[i] for l in cX_r])
+	Yp = [int(i) for i in pca_svm.predict(cint)]
+	print Yp
+	s = 411
+	for  f in features[1:5]:
+		plt.subplot(s) 
+		plt.scatter(features[0], f, color=colors[Yp].tolist())
+		i+=1
+		s+=1
+	
+	plt.show()
+	s = 411
+	for  f in features[5:10]:
+		plt.subplot(s) 
+		plt.scatter(features[0], f, color=colors[Yp].tolist())
+		i+=1
+		s+=1
+	
+	plt.show()
+	print clf.support_vectors_
+#	plt.scatter(clf.support_vectors_,range(0,3), color=colors[range(0,3)].tolist())
+	
+	return
+	#intervalslist=scale(intervalslist)
+	#print intervalslist
+	featdim = 5
+	ncluster = 8
+	clusters = range(1,ncluster+1)
+
+	pca = PCA(n_components=featdim)
+	X_r = pca.fit(intervalslist).transform(intervalslist)
+	features = []
+	for i in range(0,featdim):
+		features.append([l[i] for l in X_r])
+	
+	#return
+	kmeans = KMeans()
+	#print X_r
+	pca_clustering = Pipeline([('pca', pca), ('minmaxnorm',preprocessing.Normalizer()), ('kmeans', kmeans)])
+	clustering = Pipeline([ ('kmeans', kmeans)])
+	print pca_clustering.fit(intervalslist)
+	#return
+	pca_clusters = pca_clustering.predict(intervalslist)
+
+	clustering.fit(intervalslist)
+	nopca_clusters = clustering.predict(intervalslist)
+	clustered = []
+	i = 0
+	s = 411
+	for  f in features[1:]:
+		plt.subplot(s) 
+		plt.scatter(features[0], f, color=colors[pca_clusters].tolist())
+		i+=1
+		s+=1
+	
+	plt.show()
+	
+	"""
+	try:
+	opts, args = getopt.getopt(argv, "p:o:", [ "perc=", "all"])
+	except getopt.GetoptError:
+	#usage()
+	return
+
+	for opt, arg in opts:
+	if opt in ("-p", "--perc"):
+	perc = float(arg)
+
+	if opt in ("-o"):
+	output = arg
+	if opt in ("--all"):
+	_all = 1
+	"""
+
+if __name__ == "__main__":
+	main(sys.argv[1:])

@@ -1,0 +1,78 @@
+from os.path import isfile, join
+import string
+import sys
+import os
+import getopt
+import random
+
+import pylab as pl
+
+from sklearn import datasets
+from sklearn.decomposition import PCA
+
+def read_csv(nf,sep):
+    nodes = []
+    for l in nf:
+        (n,cl) = l.rstrip().split(sep)
+        c = 0
+        if cl == "0":
+            c = -1
+        elif cl == "1":
+            c = 1
+        if c!=0:
+            nodes.append((n,c))
+    return nodes
+
+def dict_to_list(interval):
+    index = interval[index]
+    th1 = interval[th1]
+    th2 = interval[th2]
+    th3 = interval[th3]
+    l = [index,th1,th2,th3]
+    print l
+
+# MAIN
+def main(argv):
+    # defaults
+    directory =""
+    perc = 0.9
+    output = ""
+    intfile = open('../../script/stats.csv','r')
+    lines = [ l.rstrip() for l in intfile.readlines()]
+    header = lines[0].split(',')
+    lines = lines[1:]
+    intervals = []
+
+    # carica in intervals tutti gli intervalli creati
+    # in ordine di indice (ie temporale)
+
+    for l in lines:
+        llist = l.split(',')
+        tmpdict = {}
+        i = 0
+        for h in header:
+            tmpdict[h] = llist[i]
+            i+=1
+        intervals.append(tmpdict)
+
+    print intervals
+
+"""
+    try:
+            opts, args = getopt.getopt(argv, "p:o:", [ "perc=", "all"])
+        except getopt.GetoptError:
+            #usage()
+            return
+
+        for opt, arg in opts:
+               if opt in ("-p", "--perc"):
+                    perc = float(arg)
+
+               if opt in ("-o"):
+                    output = arg
+                if opt in ("--all"):
+                    _all = 1
+"""
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
