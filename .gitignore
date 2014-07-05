@@ -1,0 +1,6 @@
+*.pyc
+*~
+*.csv
+*.txt
+*.pkl
+.gitignore

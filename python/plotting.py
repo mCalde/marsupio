@@ -36,8 +36,10 @@ def plot_DBSCAN_clustering_result(data,clustering,i,j):
 	pl.scatter(centroids[:,i],centroids[:,j],marker='x', c ='r',linewidths=2,s = 100)
 	pl.show()
 """
-def plot_all(data):
+def plot_all(data,title=""):
 	pl.figure(figsize=(10,6),dpi=80)
+	print title	
+	pl.title(title)
 	if len(data.shape)==1:
 		pl.plot(data)
 	else: 
@@ -45,12 +47,25 @@ def plot_all(data):
 			pl.plot(data[:,i])
 	pl.show()
 	
-def plot_in_subplots(data,varstart,varend):
+def plot_in_subplots(data,varstart,varend,col='b',subsize=(18,8)):
 	nsubplots = varend-varstart
-	f, axarr = pl.subplots(2, nsubplots/2, sharex=True,figsize=(18,8))
-	for (i,ax) in zip(range(varstart,varend),axarr.flatten()):
-		ax.plot(data[:,i])
-		ax.set_title(fm.original_header[i])
+	if nsubplots == 1:
+		
+		pl.figure(figsize=subsize)
+		pl.plot(data[:,varstart],c=col)
+		pl.title(fm.original_header[varstart])
+	elif nsubplots % 2 == 0:
+		f, axarr = pl.subplots(2, nsubplots/2, sharex=True,figsize=subsize)
+		for (i,ax) in zip(range(varstart,varend),axarr.flatten()):
+			ax.plot(data[:,i],c=col)
+			ax.set_title(fm.original_header[i])
+	else:
+		f, axarr = pl.subplots(2, nsubplots/2+1, sharex=True,figsize=subsize)
+		axarr_fl = axarr.flatten()[:-1]
+		for (i,ax) in zip(range(varstart,varend),axarr_fl):
+			ax.plot(data[:,i],c=col)
+			ax.set_title(fm.original_header[i])
+
 	pl.show()
 
 

@@ -18,6 +18,16 @@ from sklearn import svm
 import matplotlib.pyplot as pl
 import numpy as np
 import feature_man as fm
+
+
+def rnn_test(X,Y):
+	import neurolab as nl
+	#evaluation set
+	X_train, X_test, y_train, y_test = cross_validation.train_test_split(X, Y, test_size=_test_size, random_state=0)
+		
+	# Create network with 2 layers
+	net = nl.net.newelm([[-2, 2]], [10, 1], [nl.trans.TanSig(), nl.trans.PureLin()])
+	
 def cross_model_selection(X,Y,pars, _test_size=0.3,save = False):
 	
 	#evaluation set

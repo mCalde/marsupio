@@ -20,12 +20,12 @@ import classification as cl
 # loads dataset from alldatafile
 # returns the segment data ( each element of segmdata is a segment of the data of length wl )
 
-def load_dataset(wl,ol,framefile='../script/stepstats.csv',alldatafile='/home/ilaria/Scrivania/marsupio/acquisizione20062014/acquisizione_20062014/Data_115818.txt',):
+def load_dataset(wl,ol,median_filter=False,framefile='../script/stepstats.csv',alldatafile='/home/ilaria/Scrivania/marsupio/acquisizione20062014/acquisizione_20062014/Data_115818.txt',):
 	
 
 	data = fm.read_data_file(alldatafile,keep_marker=False)
-
-#	data = prproc.median_filter(data)
+	if median_filter:
+		data = prproc.median_filter(data)
 	#print data.shape
 	# calc theta value as arccos(z_norm) for each item
 	
@@ -99,6 +99,28 @@ def main(argv):
 	window_length = 50
 	overlap = window_length/2
 	featdim = 10
+	#data_115818,sgmdata_115818 = load_dataset(window_length,overlap)
+	training_data,training_sgmdata = load_dataset(window_length,overlap)
+	
+	training_featdata,header = build_dataset_features(training_sgmdata)
+	cl.rnn_test(training_featdata)
+	return
+	data_120250,sgmdata_120250 = load_dataset(window_length,overlap,median_filter=True,alldatafile='../../acquisizione20062014/acquisizione_20062014/Data_120250.txt')
+	
+	# questi dati son completamente diversi dagli altri tre
+	# data_120611,sgmdata_120611 = load_dataset(window_length,overlap,median_filter=True,alldatafile='../../acquisizione20062014/acquisizione_20062014/Data_120611.txt')
+	"""
+	data_120922,sgmdata_120922 = load_dataset(window_length,overlap,median_filter=True,alldatafile='../../acquisizione20062014/acquisizione_20062014/Data_120922.txt')
+
+	all_data = [(data_115818,"115818"),(data_120250,"120250"),(data_120611,"120611"),(data_120922,"120922")]
+	sgm_data = [sgmdata_115818,sgmdata_120250,sgmdata_120611,sgmdata_120922]
+	cols = ['b','r','g','m']
+	for (data,title),c in zip(all_data,cols):
+		print "Acquisizione", title
+		plt.plot_in_subplots(data,0,1,c)
+		return
+	"""
+	return
 	
 	training_data,training_sgmdata = load_dataset(window_length,overlap)
 	
